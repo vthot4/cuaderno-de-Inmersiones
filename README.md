@@ -15,19 +15,19 @@ npm run check    # comprueba tipos y frontmatter
 ## Escribir
 
 Cada entrada es un archivo Markdown en `src/content/`. El nombre del archivo es su dirección:
-`src/content/zonas/isla-de-mouro.md` → `/zonas/isla-de-mouro/`.
+`src/content/zonas/playa-de-ostende.md` → `/zonas/playa-de-ostende/`.
 
-Las entradas que hay ahora son de ejemplo: sirven de plantilla y se pueden borrar.
+Las fichas de especies y el artículo de `temas/` que hay ahora son de ejemplo: sirven de plantilla y se pueden borrar.
 
 ### Inmersión — `src/content/inmersiones/`
 
 ```yaml
 ---
-titulo: Primera página del cuaderno
+titulo: Inmersión en Ostende
 resumen: Una frase para la tarjeta y la cabecera.
 fecha: 2026-10-03
-zona: isla-de-mouro            # nombre de archivo de una zona
-profundidadMax: 18             # metros
+zona: playa-de-ostende         # nombre de archivo de una zona
+profundidadMax: 10             # metros
 duracion: 46                   # minutos
 numero: 1                      # opcional: número de inmersión, sale en el sello
 temperatura: 17                # opcional, °C
@@ -42,13 +42,13 @@ El perfil de la inmersión se dibuja solo a partir de `profundidadMax` y `duraci
 
 ```yaml
 ---
-nombre: Isla de Mouro
+nombre: Playa de Ostende
 resumen: Una frase.
 comunidad: Cantabria           # Galicia | Asturias | Cantabria | Euskadi
-localidad: Santander
-coordenadas: { lat: 43.4733, lon: -3.7557 }   # grados decimales; oeste en negativo
-profundidad: { min: 5, max: 25 }
-acceso: barco                  # costa | barco
+localidad: Castro Urdiales
+coordenadas: { lat: 43.3891, lon: -3.2268 }   # grados decimales; oeste en negativo
+profundidad: { min: 0, max: 15 }
+acceso: costa                  # costa | barco
 nivel: Todos los niveles       # opcional
 ---
 ```

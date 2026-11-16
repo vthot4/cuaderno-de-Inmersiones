@@ -1,7 +1,9 @@
 ---
 interface Props {
+  /** Texto grande: número de inmersión o día y mes. */
   centro: string;
-  pie?: string;
+  /** Texto pequeño bajo el centro: fecha completa o año. */
+  pie: string;
 }
 
 const { centro, pie } = Astro.props;
@@ -18,8 +20,8 @@ const { centro, pie } = Astro.props;
       CUADERNO DE INMERSIONES · MAR CANTÁBRICO ·
     </textPath>
   </text>
-  <text class="centro" x="60" y={pie ? 60 : 66} text-anchor="middle">{centro}</text>
-  {pie && <text class="fecha" x="60" y="75" text-anchor="middle">{pie}</text>}
+  <text class="centro" x="60" y="60" text-anchor="middle">{centro}</text>
+  <text class="fecha" x="60" y="75" text-anchor="middle">{pie}</text>
 </svg>
 
 <style>

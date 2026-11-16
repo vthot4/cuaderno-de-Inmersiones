@@ -7,7 +7,7 @@ import PerfilInmersion from '../../components/PerfilInmersion.astro';
 import Sello from '../../components/Sello.astro';
 import TarjetaEspecie from '../../components/TarjetaEspecie.astro';
 import { especiesDe, zonaDe } from '../../lib/contenido';
-import { decimal, fecha, ruta } from '../../lib/sitio';
+import { decimal, diaMes, fecha, ruta } from '../../lib/sitio';
 
 export async function getStaticPaths() {
   const inmersiones = await getCollection('inmersiones');
@@ -25,7 +25,13 @@ const { Content } = await render(inmersion);
 <Base titulo={titulo} descripcion={resumen}>
   <Encabezado sobre={`Inmersión · ${dia}`} titulo={titulo} resumen={resumen}>
     <div class="sello">
-      <Sello centro={numero ? `Nº ${numero}` : dia} pie={numero ? dia : undefined} />
+      {
+        numero ? (
+          <Sello centro={`Nº ${numero}`} pie={dia} />
+        ) : (
+          <Sello centro={diaMes(inmersion.data.fecha)} pie={String(inmersion.data.fecha.getUTCFullYear())} />
+        )
+      }
     </div>
   </Encabezado>
 

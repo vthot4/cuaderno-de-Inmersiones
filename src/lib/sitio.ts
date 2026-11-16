@@ -24,6 +24,11 @@ const formatoFecha = new Intl.DateTimeFormat('es-ES', {
 });
 
 export const fecha = (d: Date) => formatoFecha.format(d);
+
+const formatoDiaMes = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+
+/** Día y mes sin año (`3 oct`), para el centro del sello cuando la inmersión no lleva número. */
+export const diaMes = (d: Date) => formatoDiaMes.format(d);
 export const fechaISO = (d: Date) => d.toISOString().slice(0, 10);
 
 export const decimal = (n: number) => n.toLocaleString('es-ES', { maximumFractionDigits: 1 });
