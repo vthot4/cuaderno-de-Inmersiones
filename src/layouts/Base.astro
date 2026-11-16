@@ -30,7 +30,8 @@ const canonica = new URL(Astro.url.pathname, Astro.site);
     <title>{tituloCompleto}</title>
     <meta name="description" content={descripcion} />
     <link rel="canonical" href={canonica} />
-    <link rel="icon" type="image/svg+xml" href={ruta('/favicon.svg')} />
+    <link rel="icon" type="image/png" href={ruta('/favicon.png')} />
+    <link rel="apple-touch-icon" href={ruta('/apple-touch-icon.png')} />
     <meta name="theme-color" content="#f3efe4" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={SITIO.titulo} />

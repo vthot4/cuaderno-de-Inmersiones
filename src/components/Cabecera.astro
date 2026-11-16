@@ -1,4 +1,6 @@
 ---
+import { Image } from 'astro:assets';
+import logo from '../assets/logo.png';
 import { NAVEGACION, SITIO, ruta } from '../lib/sitio';
 
 const actual = Astro.url.pathname;
@@ -6,15 +8,7 @@ const actual = Astro.url.pathname;
 
 <header class="cabecera contenedor">
   <a class="marca" href={ruta('/')}>
-    <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">
-      <circle cx="16" cy="16" r="14.5" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
-      <path
-        d="M2.5 13c3-2.5 6-2.5 9 0s6 2.5 9 0 6-2.5 9 0"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.5"></path>
-      <circle class="buzo" cx="16" cy="21.5" r="2.4"></circle>
-    </svg>
+    <Image src={logo} alt="" width={84} loading="eager" decoding="sync" />
     {SITIO.titulo}
   </a>
   <nav aria-label="Secciones">
@@ -51,8 +45,9 @@ const actual = Astro.url.pathname;
     text-decoration: none;
   }
 
-  .buzo {
-    fill: var(--ocle);
+  .marca img {
+    width: auto;
+    height: 3rem;
   }
 
   ul {
