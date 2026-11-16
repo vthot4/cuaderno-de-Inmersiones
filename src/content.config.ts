@@ -49,6 +49,8 @@ const inmersiones = defineCollection({
       duracion: z.number().positive(),
       temperatura: z.number().optional(),
       visibilidad: z.number().min(0).optional(),
+      hora: z.string().regex(/^\d{1,2}:\d{2}$/, 'La hora va como HH:MM, por ejemplo "10:30"').optional(),
+      companero: z.string().optional(),
       especies: z.array(reference('especies')).default([]),
       imagen: z.object({ src: image(), alt: z.string() }).optional(),
     }),

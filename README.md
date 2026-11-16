@@ -32,11 +32,19 @@ duracion: 46                   # minutos
 numero: 1                      # opcional: número de inmersión, sale en el sello
 temperatura: 17                # opcional, °C
 visibilidad: 8                 # opcional, metros
+hora: "10:30"                   # opcional, HH:MM entre comillas
+companero: Ana                  # opcional, compañero de inmersión
 especies: [pulpo-comun, maragota]   # opcional: nombres de archivo de especies
 ---
 ```
 
 El perfil de la inmersión se dibuja solo a partir de `profundidadMax` y `duracion`; es orientativo.
+
+### Logbook — `/logbook/`
+
+Se genera solo, una línea por cada inmersión de `src/content/inmersiones/`, de la más antigua a la más
+reciente: nº, día, hora, zona, tiempo, profundidad máxima, visibilidad, temperatura del agua y compañero.
+Lo que falte en la inmersión sale como «—». Si no pones `numero`, el nº es el orden cronológico.
 
 ### Zona — `src/content/zonas/`
 

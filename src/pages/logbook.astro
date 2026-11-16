@@ -1,0 +1,179 @@
+---
+import '@fontsource-variable/caveat/wght.css';
+import Base from '../layouts/Base.astro';
+import Encabezado from '../components/Encabezado.astro';
+import { zonaDe } from '../lib/contenido';
+import { decimal, fecha, fechaISO, ruta } from '../lib/sitio';
+import { getCollection } from 'astro:content';
+
+// Como en un logbook de papel: la más antigua arriba y las nuevas se añaden al final.
+const cronologicas = (await getCollection('inmersiones')).sort(
+  (a, b) => a.data.fecha.valueOf() - b.data.fecha.valueOf(),
+);
+
+const lineas = await Promise.all(
+  cronologicas.map(async (inmersion, i) => ({
+    inmersion,
+    zona: await zonaDe(inmersion),
+    numero: inmersion.data.numero ?? i + 1,
+  })),
+);
+
+const minutos = lineas.reduce((total, { inmersion }) => total + inmersion.data.duracion, 0);
+const cotaMaxima = Math.max(0, ...lineas.map(({ inmersion }) => inmersion.data.profundidadMax));
+const horas = `${Math.floor(minutos / 60)} h ${String(minutos % 60).padStart(2, '0')} min`;
+
+const vacio = '—';
+const columnas = ['Nº', 'Día', 'Hora', 'Zona', 'Tiempo', 'Prof. máx.', 'Visib.', 'Agua', 'Compañero'];
+---
+
+<Base titulo="Logbook" descripcion="Registro de inmersiones: día, hora, zona, tiempo, profundidad, visibilidad y temperatura.">
+  <Encabezado
+    sobre="Registro"
+    titulo="Logbook"
+    resumen="Una línea por inmersión, con los datos de siempre. Los detalles, en el cuaderno."
+  />
+
+  <div class="contenedor cuerpo">
+    {
+      lineas.length > 0 ? (
+        <div class="papel" role="region" aria-label="Tabla del logbook" tabindex="0">
+          <table>
+            <thead>
+              <tr>
+                {columnas.map((nombre) => (
+                  <th scope="col">{nombre}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {lineas.map(({ inmersion, zona, numero }) => {
+                const { fecha: dia, hora, duracion, profundidadMax, visibilidad, temperatura, companero } = inmersion.data;
+                return (
+                  <tr>
+                    <th scope="row" class="num">{numero}</th>
+                    <td>
+                      <a href={ruta(`/inmersiones/${inmersion.id}/`)} title={inmersion.data.titulo}>
+                        <time datetime={fechaISO(dia)}>{fecha(dia)}</time>
+                      </a>
+                    </td>
+                    <td>{hora ?? vacio}</td>
+                    <td>
+                      <a href={ruta(`/zonas/${zona.id}/`)}>{zona.data.nombre}</a>
+                    </td>
+                    <td class="cifra">{duracion} min</td>
+                    <td class="cifra">{decimal(profundidadMax)} m</td>
+                    <td class="cifra">{visibilidad !== undefined ? `${decimal(visibilidad)} m` : vacio}</td>
+                    <td class="cifra">{temperatura !== undefined ? `${decimal(temperatura)} °C` : vacio}</td>
+                    <td>{companero ?? vacio}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot>
+              <tr>
+                <th scope="row" colspan="4">Totales: {lineas.length} {lineas.length === 1 ? 'inmersión' : 'inmersiones'}</th>
+                <td class="cifra">{horas}</td>
+                <td class="cifra">{decimal(cotaMaxima)} m</td>
+                <td colspan="3"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      ) : (
+        <p class="vacio">Todavía no hay inmersiones apuntadas.</p>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .cuerpo {
+    padding-block: 2rem 5rem;
+  }
+
+  /* Hoja de cuaderno: renglones, margen rojo a la izquierda y letra a mano. */
+  .papel {
+    --renglon: 3rem;
+    overflow-x: auto;
+    border: 1px solid var(--linea);
+    border-radius: 3px;
+    background-color: var(--espuma);
+    box-shadow: 0 1px 0 rgb(4 22 28 / 0.08), 0 14px 28px -18px rgb(4 22 28 / 0.55);
+    font-family: 'Caveat Variable', 'Segoe Print', 'Bradley Hand', cursive;
+    font-size: 1.55rem;
+    line-height: 1.1;
+    color: #1b3552; /* tinta de bolígrafo azul */
+  }
+
+  table {
+    width: 100%;
+    min-width: 62rem;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    height: var(--renglon);
+    padding: 0 0.9rem;
+    border-bottom: 1px solid rgb(31 111 107 / 0.28);
+    text-align: left;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  thead th {
+    border-bottom: 2px solid rgb(31 111 107 / 0.5);
+    font-family: var(--f-dato);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--tinta-suave);
+  }
+
+  /* El margen rojo del cuaderno. */
+  thead th:first-child,
+  .num {
+    border-right: 2px solid rgb(163 50 63 / 0.55);
+  }
+
+  .num {
+    width: 3.5rem;
+    text-align: center;
+    padding-inline: 0.6rem;
+    font-weight: 600;
+  }
+
+  .cifra {
+    text-align: right;
+  }
+
+  thead th:nth-child(n + 5):nth-child(-n + 8) {
+    text-align: right;
+  }
+
+  tbody tr:nth-child(even) {
+    transform: rotate(-0.15deg);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: rgb(163 50 63 / 0.55);
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 0.18em;
+  }
+
+  a:hover {
+    text-decoration-color: var(--ocle);
+  }
+
+  tfoot th,
+  tfoot td {
+    border-top: 2px solid rgb(31 111 107 / 0.5);
+    border-bottom: none;
+    font-weight: 600;
+    background: color-mix(in srgb, var(--mar-1) 7%, transparent);
+  }
+</style>

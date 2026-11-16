@@ -8,6 +8,7 @@ export const NAVEGACION = [
   { camino: '/zonas/', texto: 'Zonas' },
   { camino: '/especies/', texto: 'Fauna y flora' },
   { camino: '/temas/', texto: 'Temas' },
+  { camino: '/logbook/', texto: 'Logbook' },
 ];
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
