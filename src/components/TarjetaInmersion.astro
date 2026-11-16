@@ -1,0 +1,39 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import PerfilInmersion from './PerfilInmersion.astro';
+import { zonaDe } from '../lib/contenido';
+import { decimal, fecha, fechaISO, ruta } from '../lib/sitio';
+
+interface Props {
+  inmersion: CollectionEntry<'inmersiones'>;
+}
+
+const { inmersion } = Astro.props;
+const { titulo, resumen, profundidadMax, duracion, temperatura } = inmersion.data;
+const zona = await zonaDe(inmersion);
+---
+
+<a class="hoja" href={ruta(`/inmersiones/${inmersion.id}/`)}>
+  <div class="cuerpo">
+    <p class="dato">
+      <time datetime={fechaISO(inmersion.data.fecha)}>{fecha(inmersion.data.fecha)}</time> · {zona.data.nombre}
+    </p>
+    <h3>{titulo}</h3>
+    <p class="resumen">{resumen}</p>
+  </div>
+  <div class="registro">
+    <PerfilInmersion profundidadMax={profundidadMax} duracion={duracion} compacto />
+    <p class="dato">
+      {decimal(profundidadMax)} m · {duracion} min{temperatura !== undefined && ` · ${decimal(temperatura)} °C`}
+    </p>
+  </div>
+</a>
+
+<style>
+  .registro {
+    display: grid;
+    gap: 0.6rem;
+    padding: 0.9rem 1.25rem 1.1rem;
+    border-top: 1px dashed var(--linea);
+  }
+</style>

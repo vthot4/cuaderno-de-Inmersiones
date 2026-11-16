@@ -1,0 +1,21 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import FranjaProfundidad from './FranjaProfundidad.astro';
+import { ruta } from '../lib/sitio';
+
+interface Props {
+  zona: CollectionEntry<'zonas'>;
+}
+
+const { zona } = Astro.props;
+const { nombre, resumen, localidad, comunidad, acceso, profundidad } = zona.data;
+---
+
+<a class="hoja" href={ruta(`/zonas/${zona.id}/`)}>
+  <div class="cuerpo">
+    <p class="dato">{localidad} · {comunidad} · desde {acceso}</p>
+    <h3>{nombre}</h3>
+    <p class="resumen">{resumen}</p>
+    <FranjaProfundidad {...profundidad} />
+  </div>
+</a>

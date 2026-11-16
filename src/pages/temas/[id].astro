@@ -1,0 +1,35 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Encabezado from '../../components/Encabezado.astro';
+import { fecha } from '../../lib/sitio';
+
+export async function getStaticPaths() {
+  const temas = await getCollection('temas');
+  return temas.map((tema) => ({ params: { id: tema.id }, props: { tema } }));
+}
+
+const { tema } = Astro.props;
+const { titulo, resumen, etiquetas, imagen } = tema.data;
+const sobre = [fecha(tema.data.fecha), ...etiquetas].join(' · ');
+const { Content } = await render(tema);
+---
+
+<Base titulo={titulo} descripcion={resumen}>
+  <Encabezado sobre={sobre} titulo={titulo} resumen={resumen} />
+  <div class="contenedor cuerpo">
+    {imagen && <Image class="foto" src={imagen.src} alt={imagen.alt} width={1400} />}
+    <article class="prosa">
+      <Content />
+    </article>
+  </div>
+</Base>
+
+<style>
+  .cuerpo {
+    display: grid;
+    gap: 2.5rem;
+    padding-block: 2.5rem 5rem;
+  }
+</style>

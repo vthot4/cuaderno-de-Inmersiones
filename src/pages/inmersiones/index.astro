@@ -1,0 +1,51 @@
+---
+import Base from '../../layouts/Base.astro';
+import Encabezado from '../../components/Encabezado.astro';
+import TarjetaInmersion from '../../components/TarjetaInmersion.astro';
+import { inmersionesRecientes } from '../../lib/contenido';
+import { decimal } from '../../lib/sitio';
+
+const inmersiones = await inmersionesRecientes();
+const minutos = inmersiones.reduce((total, { data }) => total + data.duracion, 0);
+const cotaMaxima = Math.max(0, ...inmersiones.map(({ data }) => data.profundidadMax));
+---
+
+<Base titulo="Inmersiones" descripcion="Todas las inmersiones apuntadas en el cuaderno.">
+  <Encabezado
+    sobre="El cuaderno"
+    titulo="Inmersiones"
+    resumen="Una página por inmersión, de la más reciente a la más antigua."
+  />
+  <div class="contenedor cuerpo">
+    {
+      inmersiones.length > 0 ? (
+        <>
+          <p class="dato totales">
+            {inmersiones.length} {inmersiones.length === 1 ? 'inmersión' : 'inmersiones'} · {minutos} min bajo el
+            agua · cota máxima {decimal(cotaMaxima)} m
+          </p>
+          <ul class="rejilla ancha">
+            {inmersiones.map((inmersion) => (
+              <li>
+                <TarjetaInmersion inmersion={inmersion} />
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <p class="vacio">Todavía no hay inmersiones apuntadas.</p>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .cuerpo {
+    padding-block: 2.5rem 5rem;
+  }
+
+  .totales {
+    margin-bottom: 2rem;
+    color: var(--tinta-suave);
+  }
+</style>

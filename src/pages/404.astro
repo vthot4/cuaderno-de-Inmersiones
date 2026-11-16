@@ -1,0 +1,26 @@
+---
+import Base from '../layouts/Base.astro';
+import Encabezado from '../components/Encabezado.astro';
+import { ruta } from '../lib/sitio';
+---
+
+<Base titulo="Sin visibilidad">
+  <Encabezado
+    sobre="Error 404 · Visibilidad 0 m"
+    titulo="Aquí no se ve nada"
+    resumen="Esta página no existe o se la ha llevado la corriente."
+  />
+  <p class="contenedor salida"><a href={ruta('/')}>Volver a la superficie</a></p>
+</Base>
+
+<style>
+  .salida {
+    padding-block: 2.5rem 5rem;
+    font-size: 1.25rem;
+  }
+
+  .salida a {
+    color: var(--ocle);
+    text-underline-offset: 0.2em;
+  }
+</style>

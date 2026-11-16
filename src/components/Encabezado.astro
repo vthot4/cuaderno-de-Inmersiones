@@ -1,0 +1,47 @@
+---
+interface Props {
+  /** Línea pequeña sobre el título: tipo de página, fecha, lugar. */
+  sobre: string;
+  titulo: string;
+  resumen?: string;
+}
+
+const { sobre, titulo, resumen } = Astro.props;
+---
+
+<header class="encabezado contenedor">
+  <p class="dato sobre">{sobre}</p>
+  <h1>{titulo}</h1>
+  <slot name="subtitulo" />
+  {resumen && <p class="resumen">{resumen}</p>}
+  <slot />
+</header>
+
+<style>
+  .encabezado {
+    position: relative;
+    padding-block: clamp(2rem, 6vw, 4.5rem) 2.75rem;
+    background: var(--ola-trazo) left bottom / 60px 12px repeat-x;
+  }
+
+  .sobre {
+    margin-bottom: 1rem;
+    color: var(--ocle);
+  }
+
+  h1 {
+    max-width: 16ch;
+    font-size: clamp(2.6rem, 7.5vw, 5.25rem);
+    font-weight: 500;
+    line-height: 0.98;
+    letter-spacing: -0.025em;
+  }
+
+  .resumen {
+    max-width: 34rem;
+    margin-top: 1.25rem;
+    font-size: 1.4rem;
+    line-height: 1.4;
+    color: var(--tinta-suave);
+  }
+</style>

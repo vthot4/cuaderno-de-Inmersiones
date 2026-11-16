@@ -1,0 +1,46 @@
+---
+interface Props {
+  min: number;
+  max: number;
+}
+
+/** Metros que representa la barra completa; lo que pase de ahí se recorta. */
+const ESCALA = 40;
+const { min, max } = Astro.props;
+const porcentaje = (metros: number) => (Math.min(metros, ESCALA) / ESCALA) * 100;
+---
+
+<div class="franja">
+  <span class="barra" style={`--desde:${porcentaje(min)}%;--hasta:${porcentaje(max)}%`} aria-hidden="true"></span>
+  <span class="dato">{min}–{max} m</span>
+</div>
+
+<style>
+  .franja {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: auto;
+    padding-top: 0.6rem;
+  }
+
+  .barra {
+    position: relative;
+    flex: 1;
+    height: 0.4rem;
+    border-radius: 99px;
+    background: var(--linea);
+  }
+
+  .barra::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, var(--mar-0), var(--mar-4));
+    clip-path: inset(0 calc(100% - var(--hasta)) 0 var(--desde) round 99px);
+  }
+
+  .dato {
+    white-space: nowrap;
+  }
+</style>

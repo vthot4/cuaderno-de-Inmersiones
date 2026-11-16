@@ -1,0 +1,139 @@
+---
+interface Props {
+  /** Metros. */
+  profundidadMax: number;
+  /** Minutos. */
+  duracion: number;
+  /** Miniatura sin ejes para las tarjetas. */
+  compacto?: boolean;
+}
+
+const { profundidadMax: fondo, duracion, compacto = false } = Astro.props;
+
+/**
+ * Perfil plausible, en pares (minuto, metros), a partir de los dos únicos datos
+ * que guarda el cuaderno: bajada directa, fondo, ascenso escalonado y parada de
+ * seguridad de 3 min a 5 m.
+ */
+function trazar(fondo: number, duracion: number): [number, number][] {
+  const bajada = Math.min(fondo / 18, duracion * 0.15);
+  if (fondo <= 6 || duracion < 12) {
+    const subida = Math.min(fondo / 9, duracion * 0.15);
+    return [[0, 0], [bajada, fondo], [duracion - subida, fondo], [duracion, 0]];
+  }
+  const finParada = duracion - 5 / 9;
+  const inicioParada = finParada - 3;
+  const tramo = inicioParada - bajada;
+  return [
+    [0, 0],
+    [bajada, fondo],
+    [bajada + tramo * 0.35, fondo],
+    [bajada + tramo * 0.7, 5 + (fondo - 5) * 0.5],
+    [inicioParada, 5],
+    [finParada, 5],
+    [duracion, 0],
+  ];
+}
+
+const ANCHO = compacto ? 120 : 640;
+const ALTO = compacto ? 40 : 260;
+const margen = compacto ? { izq: 1, der: 1, arr: 1, abj: 3 } : { izq: 46, der: 14, arr: 14, abj: 34 };
+
+const techo = compacto ? fondo : Math.max(10, Math.ceil(fondo / 5) * 5);
+const x = (minuto: number) => margen.izq + (minuto / duracion) * (ANCHO - margen.izq - margen.der);
+const y = (metros: number) => margen.arr + (metros / techo) * (ALTO - margen.arr - margen.abj);
+
+const puntos = trazar(fondo, duracion);
+const linea = puntos.map(([minuto, metros]) => `${x(minuto).toFixed(1)},${y(metros).toFixed(1)}`).join(' ');
+
+const escalones = (hasta: number, paso: number) =>
+  Array.from({ length: Math.floor(hasta / paso) + 1 }, (_, i) => i * paso);
+const marcasY = escalones(techo, techo <= 30 ? 5 : 10);
+const marcasX = escalones(duracion, duracion <= 60 ? 10 : 20);
+---
+
+{
+  compacto ? (
+    <svg class="mini" viewBox={`0 0 ${ANCHO} ${ALTO}`} preserveAspectRatio="none" aria-hidden="true">
+      <polygon class="agua" points={linea} />
+      <polyline class="trazo" points={linea} />
+    </svg>
+  ) : (
+    <figure>
+      <svg
+        viewBox={`0 0 ${ANCHO} ${ALTO}`}
+        role="img"
+        aria-label={`Perfil orientativo: ${fondo} metros de profundidad máxima en ${duracion} minutos`}
+      >
+        {marcasY.map((metros) => (
+          <>
+            <line class="guia" x1={margen.izq} x2={ANCHO - margen.der} y1={y(metros)} y2={y(metros)} />
+            <text x={margen.izq - 8} y={y(metros)} dy="0.32em" text-anchor="end">
+              {metros}
+            </text>
+          </>
+        ))}
+        {marcasX.map((minuto) => (
+          <text x={x(minuto)} y={ALTO - margen.abj + 18} text-anchor="middle">
+            {minuto}
+          </text>
+        ))}
+        <text x={margen.izq - 8} y={ALTO - 4} text-anchor="end">
+          m
+        </text>
+        <text x={ANCHO - margen.der} y={ALTO - 4} text-anchor="end">
+          min
+        </text>
+        <polygon class="agua" points={linea} />
+        <polyline class="trazo" points={linea} />
+        <circle class="fondo" cx={x(puntos[1][0])} cy={y(fondo)} r="4.5" />
+      </svg>
+      <figcaption>Perfil orientativo, dibujado a partir de la profundidad máxima y el tiempo.</figcaption>
+    </figure>
+  )
+}
+
+<style>
+  svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .mini {
+    height: 2.5rem;
+  }
+
+  text {
+    font: 13px var(--f-dato);
+    fill: var(--tinta-suave);
+  }
+
+  .guia {
+    stroke: var(--linea);
+  }
+
+  .agua {
+    fill: color-mix(in srgb, var(--mar-1) 20%, transparent);
+  }
+
+  .trazo {
+    fill: none;
+    stroke: var(--mar-2);
+    stroke-width: 2.25;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .fondo {
+    fill: var(--ocle);
+  }
+
+  figcaption {
+    margin-top: 0.5rem;
+    font-size: 0.9375rem;
+    font-style: italic;
+    color: var(--tinta-suave);
+  }
+</style>

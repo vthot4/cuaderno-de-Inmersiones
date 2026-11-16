@@ -1,0 +1,79 @@
+---
+import { NAVEGACION, SITIO, ruta } from '../lib/sitio';
+
+const actual = Astro.url.pathname;
+---
+
+<header class="cabecera contenedor">
+  <a class="marca" href={ruta('/')}>
+    <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">
+      <circle cx="16" cy="16" r="14.5" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
+      <path
+        d="M2.5 13c3-2.5 6-2.5 9 0s6 2.5 9 0 6-2.5 9 0"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"></path>
+      <circle class="buzo" cx="16" cy="21.5" r="2.4"></circle>
+    </svg>
+    {SITIO.titulo}
+  </a>
+  <nav aria-label="Secciones">
+    <ul>
+      {
+        NAVEGACION.map(({ camino, texto }) => (
+          <li>
+            <a href={ruta(camino)} aria-current={actual.startsWith(ruta(camino)) ? 'page' : undefined}>
+              {texto}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .cabecera {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 2rem;
+    padding-block: 1.4rem;
+  }
+
+  .marca {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    font: 600 1.2rem/1 var(--f-titulo);
+    letter-spacing: -0.01em;
+    text-decoration: none;
+  }
+
+  .buzo {
+    fill: var(--ocle);
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem clamp(1rem, 3vw, 1.6rem);
+    padding: 0;
+    list-style: none;
+  }
+
+  nav a {
+    font: 0.8125rem var(--f-dato);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding-block: 0.3rem;
+    border-bottom: 1.5px solid transparent;
+  }
+
+  nav a:hover,
+  nav a[aria-current] {
+    border-bottom-color: var(--ocle);
+  }
+</style>

@@ -1,0 +1,54 @@
+---
+import Base from '../../layouts/Base.astro';
+import Encabezado from '../../components/Encabezado.astro';
+import TarjetaEspecie from '../../components/TarjetaEspecie.astro';
+import { especiesPorNombre } from '../../lib/contenido';
+
+const especies = await especiesPorNombre();
+const grupos = [
+  { titulo: 'Fauna', fichas: especies.filter(({ data }) => data.tipo === 'fauna') },
+  { titulo: 'Flora', fichas: especies.filter(({ data }) => data.tipo === 'flora') },
+];
+---
+
+<Base titulo="Fauna y flora" descripcion="Fichas de la fauna y la flora del Cantábrico vistas buceando.">
+  <Encabezado
+    sobre="Bajo el agua"
+    titulo="Fauna y flora"
+    resumen="Lo que vive ahí abajo, con la franja de profundidad donde suelo encontrarlo."
+  />
+  <div class="contenedor cuerpo">
+    {
+      grupos.map(({ titulo, fichas }) => (
+        <section class="bloque">
+          <h2>
+            {titulo} <span class="dato">{fichas.length}</span>
+          </h2>
+          {fichas.length > 0 ? (
+            <ul class="rejilla">
+              {fichas.map((especie) => (
+                <li>
+                  <TarjetaEspecie especie={especie} />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="vacio">Todavía no hay fichas.</p>
+          )}
+        </section>
+      ))
+    }
+  </div>
+</Base>
+
+<style>
+  .cuerpo {
+    padding-top: 2.5rem;
+  }
+
+  h2 .dato {
+    margin-left: 0.4rem;
+    color: var(--ocle);
+    vertical-align: super;
+  }
+</style>

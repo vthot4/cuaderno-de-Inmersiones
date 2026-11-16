@@ -1,0 +1,123 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Encabezado from '../../components/Encabezado.astro';
+import PerfilInmersion from '../../components/PerfilInmersion.astro';
+import Sello from '../../components/Sello.astro';
+import TarjetaEspecie from '../../components/TarjetaEspecie.astro';
+import { especiesDe, zonaDe } from '../../lib/contenido';
+import { decimal, fecha, ruta } from '../../lib/sitio';
+
+export async function getStaticPaths() {
+  const inmersiones = await getCollection('inmersiones');
+  return inmersiones.map((inmersion) => ({ params: { id: inmersion.id }, props: { inmersion } }));
+}
+
+const { inmersion } = Astro.props;
+const { titulo, resumen, numero, profundidadMax, duracion, temperatura, visibilidad, imagen } = inmersion.data;
+const dia = fecha(inmersion.data.fecha);
+const zona = await zonaDe(inmersion);
+const especies = await especiesDe(inmersion);
+const { Content } = await render(inmersion);
+---
+
+<Base titulo={titulo} descripcion={resumen}>
+  <Encabezado sobre={`Inmersión · ${dia}`} titulo={titulo} resumen={resumen}>
+    <div class="sello">
+      <Sello centro={numero ? `Nº ${numero}` : dia} pie={numero ? dia : undefined} />
+    </div>
+  </Encabezado>
+
+  <div class="contenedor">
+    <section class="registro" aria-label="Datos de la inmersión">
+      <dl class="ficha">
+        <dt>Zona</dt>
+        <dd><a href={ruta(`/zonas/${zona.id}/`)}>{zona.data.nombre}</a></dd>
+        <dt>Profundidad máx.</dt>
+        <dd>{decimal(profundidadMax)} m</dd>
+        <dt>Tiempo</dt>
+        <dd>{duracion} min</dd>
+        {
+          temperatura !== undefined && (
+            <>
+              <dt>Agua</dt>
+              <dd>{decimal(temperatura)} °C</dd>
+            </>
+          )
+        }
+        {
+          visibilidad !== undefined && (
+            <>
+              <dt>Visibilidad</dt>
+              <dd>{decimal(visibilidad)} m</dd>
+            </>
+          )
+        }
+      </dl>
+      <PerfilInmersion profundidadMax={profundidadMax} duracion={duracion} />
+    </section>
+
+    {imagen && <Image class="foto" src={imagen.src} alt={imagen.alt} width={1400} />}
+
+    <article class="prosa texto">
+      <Content />
+    </article>
+
+    {
+      especies.length > 0 && (
+        <section class="bloque">
+          <h2>Vida vista</h2>
+          <ul class="rejilla">
+            {especies.map((especie) => (
+              <li>
+                <TarjetaEspecie especie={especie} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .sello {
+    display: none;
+  }
+
+  @media (min-width: 56rem) {
+    .sello {
+      display: block;
+      position: absolute;
+      right: 0;
+      bottom: 2.5rem;
+      width: 10.5rem;
+    }
+  }
+
+  .registro {
+    display: grid;
+    gap: 2rem 3.5rem;
+    margin-block: 2.5rem;
+    padding: clamp(1.25rem, 3vw, 2.25rem);
+    border: 1px solid var(--linea);
+    border-radius: 3px;
+    background: var(--espuma);
+  }
+
+  @media (min-width: 56rem) {
+    .registro {
+      grid-template-columns: minmax(15rem, 1fr) minmax(0, 2fr);
+      align-items: center;
+    }
+  }
+
+  .foto {
+    margin-bottom: 2.5rem;
+  }
+
+  .texto {
+    padding-bottom: 4rem;
+  }
+</style>

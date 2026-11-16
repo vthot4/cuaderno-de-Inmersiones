@@ -1,0 +1,96 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Encabezado from '../../components/Encabezado.astro';
+import MapaZonas from '../../components/MapaZonas.astro';
+import TarjetaEspecie from '../../components/TarjetaEspecie.astro';
+import TarjetaInmersion from '../../components/TarjetaInmersion.astro';
+import { especiesDe, inmersionesRecientes } from '../../lib/contenido';
+import { coordenadas } from '../../lib/sitio';
+
+export async function getStaticPaths() {
+  const zonas = await getCollection('zonas');
+  return zonas.map((zona) => ({ params: { id: zona.id }, props: { zona } }));
+}
+
+const { zona } = Astro.props;
+const { nombre, resumen, comunidad, localidad, acceso, nivel, profundidad, imagen } = zona.data;
+const { lat, lon } = zona.data.coordenadas;
+
+const inmersiones = (await inmersionesRecientes()).filter(({ data }) => data.zona.id === zona.id);
+const vistas = (await Promise.all(inmersiones.map(especiesDe))).flat();
+const especies = [...new Map(vistas.map((especie) => [especie.id, especie])).values()];
+const { Content } = await render(zona);
+---
+
+<Base titulo={nombre} descripcion={resumen}>
+  <Encabezado sobre={`Zona · ${comunidad}`} titulo={nombre} resumen={resumen} />
+
+  <div class="contenedor">
+    <div class="columnas">
+      <article class="prosa">
+        {imagen && <Image class="foto" src={imagen.src} alt={imagen.alt} width={1000} />}
+        <Content />
+      </article>
+      <aside>
+        <dl class="ficha">
+          <dt>Localidad</dt>
+          <dd>{localidad}</dd>
+          <dt>Acceso</dt>
+          <dd>Desde {acceso}</dd>
+          <dt>Profundidad</dt>
+          <dd>{profundidad.min}–{profundidad.max} m</dd>
+          {
+            nivel && (
+              <>
+                <dt>Nivel</dt>
+                <dd>{nivel}</dd>
+              </>
+            )
+          }
+          <dt>Posición</dt>
+          <dd>{coordenadas(lat, lon)}</dd>
+        </dl>
+        <MapaZonas puntos={[{ nombre, lat, lon }]} etiqueta={`Mapa de ${nombre}`} alto="18rem" />
+      </aside>
+    </div>
+
+    {
+      inmersiones.length > 0 && (
+        <section class="bloque">
+          <h2>Inmersiones aquí</h2>
+          <ul class="rejilla ancha">
+            {inmersiones.map((inmersion) => (
+              <li>
+                <TarjetaInmersion inmersion={inmersion} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      especies.length > 0 && (
+        <section class="bloque">
+          <h2>Vida vista aquí</h2>
+          <ul class="rejilla">
+            {especies.map((especie) => (
+              <li>
+                <TarjetaEspecie especie={especie} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  aside {
+    display: grid;
+    gap: 1.75rem;
+  }
+</style>

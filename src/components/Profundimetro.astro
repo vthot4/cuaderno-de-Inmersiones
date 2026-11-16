@@ -1,0 +1,152 @@
+---
+/**
+ * Profundímetro de la portada. Lee la cota de cada elemento con `data-prof`
+ * (metros) e interpola entre ellos según la posición del scroll.
+ */
+interface Props {
+  /** Cota que marca el final de la página. */
+  max: number;
+}
+
+const { max } = Astro.props;
+const marcas = Array.from({ length: Math.floor(max / 5) + 1 }, (_, i) => i * 5);
+---
+
+<div class="profundimetro" data-max={max} aria-hidden="true">
+  <ol>
+    {
+      marcas.map((metros) => (
+        <li class:list={{ mayor: metros % 10 === 0 }} style={`--y:${metros / max}`}>
+          {metros % 10 === 0 && <span>{metros}</span>}
+        </li>
+      ))
+    }
+  </ol>
+  <p class="aguja"><output>0 m</output></p>
+</div>
+
+<script>
+  const instrumento = document.querySelector<HTMLElement>('.profundimetro');
+  const lectura = instrumento?.querySelector('output');
+  const tramos = [...document.querySelectorAll<HTMLElement>('[data-prof]')];
+
+  if (instrumento && lectura && tramos.length > 0) {
+    const max = Number(instrumento.dataset.max);
+
+    const actualizar = () => {
+      // La cota se lee a la altura de los ojos: algo por encima del centro de la pantalla.
+      const mirada = scrollY + innerHeight * 0.45;
+      const cotas = tramos.map((tramo): [number, number] => [
+        tramo.getBoundingClientRect().top + scrollY,
+        Number(tramo.dataset.prof),
+      ]);
+      cotas.push([document.documentElement.scrollHeight, max]);
+
+      let metros = 0;
+      for (let i = 0; i < cotas.length - 1; i++) {
+        const [y0, m0] = cotas[i];
+        const [y1, m1] = cotas[i + 1];
+        if (mirada >= y0) metros = m0 + (m1 - m0) * Math.min(1, (mirada - y0) / (y1 - y0));
+      }
+
+      instrumento.style.setProperty('--prof', String(metros / max));
+      // Solo se enseña cuando el instrumento entero queda bajo la superficie.
+      const superficie = tramos[0].getBoundingClientRect().top;
+      instrumento.classList.toggle('sumergido', superficie <= instrumento.getBoundingClientRect().top);
+      lectura.textContent = `${Math.round(metros)} m`;
+    };
+
+    addEventListener('scroll', actualizar, { passive: true });
+    addEventListener('resize', actualizar);
+    // Mide al cargar y cada vez que cambia el alto de la página (fuentes, imágenes).
+    new ResizeObserver(actualizar).observe(document.body);
+  }
+</script>
+
+<style>
+  .profundimetro {
+    --prof: 0;
+    position: fixed;
+    z-index: 5;
+    left: 1rem;
+    bottom: 1rem;
+    color: var(--espuma);
+    font: 0.75rem var(--f-dato);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+
+  .profundimetro.sumergido {
+    opacity: 1;
+  }
+
+  ol {
+    display: none;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .aguja {
+    padding: 0.3rem 0.6rem;
+    border-radius: 2px;
+    background: var(--laminaria);
+    color: var(--mar-5);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* Con sitio en el margen, el instrumento completo: regla y aguja móvil. */
+  @media (min-width: 84rem) {
+    .profundimetro {
+      left: 1.5rem;
+      top: 18vh;
+      bottom: auto;
+      width: 5rem;
+      height: 64vh;
+      border-left: 1px solid rgb(251 249 242 / 0.5);
+    }
+
+    ol {
+      display: block;
+    }
+
+    li {
+      position: absolute;
+      left: 0;
+      top: calc(var(--y) * 100%);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      height: 0;
+      opacity: 0.75;
+    }
+
+    li::before {
+      content: '';
+      width: 0.4rem;
+      border-top: 1px solid currentColor;
+    }
+
+    li.mayor::before {
+      width: 0.8rem;
+    }
+
+    .aguja {
+      position: absolute;
+      left: 0;
+      top: calc(var(--prof) * 100%);
+      translate: 1.1rem -50%;
+    }
+
+    .aguja::before {
+      content: '';
+      position: absolute;
+      right: 100%;
+      top: 50%;
+      width: 1.1rem;
+      border-top: 2px solid var(--laminaria);
+    }
+  }
+</style>

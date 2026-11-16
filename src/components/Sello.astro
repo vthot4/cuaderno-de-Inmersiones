@@ -1,0 +1,56 @@
+---
+interface Props {
+  centro: string;
+  pie?: string;
+}
+
+const { centro, pie } = Astro.props;
+---
+
+<svg class="sello" viewBox="0 0 120 120" aria-hidden="true">
+  <defs>
+    <path id="sello-arco" d="M60 60m-45 0a45 45 0 1 1 90 0a45 45 0 1 1-90 0"></path>
+  </defs>
+  <circle cx="60" cy="60" r="57.5"></circle>
+  <circle cx="60" cy="60" r="35"></circle>
+  <text class="orla">
+    <textPath href="#sello-arco" textLength="276" lengthAdjust="spacing">
+      CUADERNO DE INMERSIONES · MAR CANTÁBRICO ·
+    </textPath>
+  </text>
+  <text class="centro" x="60" y={pie ? 60 : 66} text-anchor="middle">{centro}</text>
+  {pie && <text class="fecha" x="60" y="75" text-anchor="middle">{pie}</text>}
+</svg>
+
+<style>
+  .sello {
+    color: var(--ocle);
+    opacity: 0.82;
+    rotate: 9deg;
+  }
+
+  circle {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+  }
+
+  text {
+    fill: currentColor;
+    font-family: var(--f-dato);
+  }
+
+  .orla {
+    font-size: 8px;
+    letter-spacing: 0;
+  }
+
+  .centro {
+    font: 600 19px var(--f-titulo);
+  }
+
+  .fecha {
+    font-size: 7px;
+    text-transform: uppercase;
+  }
+</style>

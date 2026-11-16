@@ -1,0 +1,268 @@
+---
+import Base from '../layouts/Base.astro';
+import FilaTema from '../components/FilaTema.astro';
+import Profundimetro from '../components/Profundimetro.astro';
+import TarjetaEspecie from '../components/TarjetaEspecie.astro';
+import TarjetaInmersion from '../components/TarjetaInmersion.astro';
+import TarjetaZona from '../components/TarjetaZona.astro';
+import { especiesPorNombre, inmersionesRecientes, temasRecientes, zonasPorNombre } from '../lib/contenido';
+import { ruta } from '../lib/sitio';
+
+const inmersiones = (await inmersionesRecientes()).slice(0, 3);
+const zonas = (await zonasPorNombre()).slice(0, 3);
+const especies = (await especiesPorNombre()).slice(0, 4);
+const temas = (await temasRecientes()).slice(0, 4);
+
+/** Cota del final de la página; las de cada tramo van en su `data-prof`. */
+const FONDO = 45;
+---
+
+<Base portada>
+  <div class="portada">
+    <section class="cielo contenedor">
+      <p class="dato">Mar Cantábrico · 43° N</p>
+      <h1>Cuaderno de <em>inmersiones</em></h1>
+    </section>
+    <div class="cresta" aria-hidden="true"></div>
+
+    <div class="mar" data-prof="0">
+      <div class="contenedor">
+        <p class="entrada">
+          Apuntes de buceo bajo el Cantábrico: las zonas donde me meto, la fauna y la flora que voy encontrando y
+          cualquier otro tema que me apetezca contar.
+        </p>
+
+        <section class="tramo" data-prof="5">
+          <header>
+            <span class="dato">5 m</span>
+            <h2>Últimas inmersiones</h2>
+            <a class="dato" href={ruta('/inmersiones/')}>Todo el cuaderno →</a>
+          </header>
+          {
+            inmersiones.length > 0 ? (
+              <ul class="rejilla ancha">
+                {inmersiones.map((inmersion) => (
+                  <li>
+                    <TarjetaInmersion inmersion={inmersion} />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class="vacio">Todavía no hay inmersiones apuntadas.</p>
+            )
+          }
+        </section>
+
+        <section class="tramo" data-prof="15">
+          <header>
+            <span class="dato">15 m</span>
+            <h2>Zonas</h2>
+            <a class="dato" href={ruta('/zonas/')}>Ver el mapa →</a>
+          </header>
+          {
+            zonas.length > 0 ? (
+              <ul class="rejilla ancha">
+                {zonas.map((zona) => (
+                  <li>
+                    <TarjetaZona zona={zona} />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class="vacio">Todavía no hay zonas descritas.</p>
+            )
+          }
+        </section>
+
+        <section class="tramo" data-prof="25">
+          <header>
+            <span class="dato">25 m</span>
+            <h2>Fauna y flora</h2>
+            <a class="dato" href={ruta('/especies/')}>Todas las fichas →</a>
+          </header>
+          {
+            especies.length > 0 ? (
+              <ul class="rejilla">
+                {especies.map((especie) => (
+                  <li>
+                    <TarjetaEspecie especie={especie} />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class="vacio">Todavía no hay fichas de especies.</p>
+            )
+          }
+        </section>
+
+        <section class="tramo" data-prof="38">
+          <header>
+            <span class="dato">38 m</span>
+            <h2>Temas</h2>
+            <a class="dato" href={ruta('/temas/')}>Todos los temas →</a>
+          </header>
+          {
+            temas.length > 0 ? (
+              <div class="temas">
+                {temas.map((tema) => (
+                  <FilaTema tema={tema} />
+                ))}
+              </div>
+            ) : (
+              <p class="vacio">Todavía no hay temas escritos.</p>
+            )
+          }
+        </section>
+      </div>
+    </div>
+  </div>
+  <Profundimetro max={FONDO} />
+</Base>
+
+<style>
+  .portada {
+    --titular: clamp(3.4rem, 13.5vw, 11.5rem);
+    /* Cuánto del titular queda bajo la línea de flotación. */
+    --calado: calc(var(--titular) * 0.3 + 1.2rem);
+  }
+
+  .cielo {
+    padding-top: clamp(2rem, 9vh, 6rem);
+  }
+
+  .cielo .dato {
+    margin-bottom: 1.5rem;
+    color: var(--ocle);
+  }
+
+  h1 {
+    font-size: var(--titular);
+    font-weight: 440;
+    line-height: 0.88;
+    letter-spacing: -0.04em;
+    text-wrap: initial;
+  }
+
+  h1 em {
+    display: block;
+    font-weight: 380;
+  }
+
+  /* Agua translúcida sobre la mitad inferior del titular. */
+  .cresta {
+    position: relative;
+    height: var(--calado);
+    margin-top: calc(-1 * var(--calado));
+    background: rgb(31 111 107 / 0.72);
+    -webkit-mask:
+      var(--ola) 0 0 / 34rem 1.5rem repeat-x,
+      linear-gradient(#000 0 0) 0 1.45rem / 100% calc(100% - 1.45rem) no-repeat;
+    mask:
+      var(--ola) 0 0 / 34rem 1.5rem repeat-x,
+      linear-gradient(#000 0 0) 0 1.45rem / 100% calc(100% - 1.45rem) no-repeat;
+    animation: oleaje 16s linear infinite;
+  }
+
+  @keyframes oleaje {
+    to {
+      -webkit-mask-position:
+        34rem 0,
+        0 1.45rem;
+      mask-position:
+        34rem 0,
+        0 1.45rem;
+    }
+  }
+
+  .mar {
+    /* Solapa la cresta para que no quede costura entre las dos. */
+    margin-top: -2px;
+    position: relative;
+    padding-block: 5rem 6rem;
+    color: var(--espuma);
+    background: linear-gradient(
+      var(--mar-0),
+      var(--mar-1) 9rem,
+      var(--mar-2) 26%,
+      var(--mar-3) 50%,
+      var(--mar-4) 76%,
+      var(--mar-5)
+    );
+  }
+
+  /* Rayos de luz en los primeros metros. */
+  .mar::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 46rem;
+    background: repeating-linear-gradient(
+      102deg,
+      transparent 0 7rem,
+      rgb(251 249 242 / 0.05) 7rem 9.5rem,
+      transparent 9.5rem 16rem,
+      rgb(251 249 242 / 0.035) 16rem 21rem
+    );
+    -webkit-mask-image: linear-gradient(#000, transparent);
+    mask-image: linear-gradient(#000, transparent);
+    pointer-events: none;
+  }
+
+  .mar > .contenedor {
+    position: relative;
+  }
+
+  .entrada {
+    max-width: 22em;
+    font: 300 clamp(1.5rem, 3.4vw, 2.5rem) / 1.22 var(--f-titulo);
+    letter-spacing: -0.015em;
+    text-wrap: pretty;
+  }
+
+  .tramo {
+    /* Margen y no relleno: el profundímetro mide la cota en el borde superior del tramo. */
+    margin-top: clamp(5rem, 12vw, 9rem);
+  }
+
+  /* Cada tramo cuelga de su línea de cota. */
+  .tramo header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 0.9rem 2rem;
+    margin-bottom: 2.25rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid rgb(251 249 242 / 0.35);
+  }
+
+  .tramo header > span {
+    grid-column: 1 / -1;
+    color: var(--laminaria);
+  }
+
+  .tramo h2 {
+    font-size: clamp(2.2rem, 6vw, 4rem);
+    font-weight: 440;
+    letter-spacing: -0.03em;
+  }
+
+  .tramo header a {
+    padding-bottom: 0.4rem;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .tramo header a:hover {
+    color: var(--laminaria);
+  }
+
+  .temas {
+    border-bottom: 1px solid rgb(251 249 242 / 0.25);
+  }
+
+  @media (max-width: 36rem) {
+    .tramo header {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

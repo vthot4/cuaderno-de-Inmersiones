@@ -1,0 +1,43 @@
+---
+import Base from '../../layouts/Base.astro';
+import Encabezado from '../../components/Encabezado.astro';
+import MapaZonas from '../../components/MapaZonas.astro';
+import TarjetaZona from '../../components/TarjetaZona.astro';
+import { zonasPorNombre } from '../../lib/contenido';
+import { ruta } from '../../lib/sitio';
+
+const zonas = await zonasPorNombre();
+const puntos = zonas.map((zona) => ({
+  nombre: zona.data.nombre,
+  ...zona.data.coordenadas,
+  href: ruta(`/zonas/${zona.id}/`),
+}));
+---
+
+<Base titulo="Zonas" descripcion="Zonas de buceo del Cantábrico descritas en el cuaderno.">
+  <Encabezado sobre="La costa" titulo="Zonas" resumen="Los sitios donde me meto al agua, de Galicia a Euskadi." />
+  <div class="contenedor cuerpo">
+    <MapaZonas puntos={puntos} etiqueta="Mapa de las zonas de inmersión" />
+    {
+      zonas.length > 0 ? (
+        <ul class="rejilla ancha">
+          {zonas.map((zona) => (
+            <li>
+              <TarjetaZona zona={zona} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="vacio">Todavía no hay zonas descritas.</p>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .cuerpo {
+    display: grid;
+    gap: 2.5rem;
+    padding-block: 2.5rem 5rem;
+  }
+</style>

@@ -1,0 +1,85 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Encabezado from '../../components/Encabezado.astro';
+import FranjaProfundidad from '../../components/FranjaProfundidad.astro';
+import TarjetaInmersion from '../../components/TarjetaInmersion.astro';
+import { inmersionesRecientes } from '../../lib/contenido';
+
+export async function getStaticPaths() {
+  const especies = await getCollection('especies');
+  return especies.map((especie) => ({ params: { id: especie.id }, props: { especie } }));
+}
+
+const { especie } = Astro.props;
+const { nombre, cientifico, tipo, grupo, resumen, profundidad, imagen } = especie.data;
+
+const inmersiones = (await inmersionesRecientes()).filter(({ data }) =>
+  data.especies.some(({ id }) => id === especie.id),
+);
+const { Content } = await render(especie);
+---
+
+<Base titulo={`${nombre} (${cientifico})`} descripcion={resumen}>
+  <Encabezado sobre={`${tipo} · ${grupo}`} titulo={nombre} resumen={resumen}>
+    <p slot="subtitulo" class="cientifico binomio">{cientifico}</p>
+  </Encabezado>
+
+  <div class="contenedor">
+    <div class="columnas">
+      <article class="prosa">
+        <Content />
+      </article>
+      <aside>
+        {imagen && <Image class="foto" src={imagen.src} alt={imagen.alt} width={800} />}
+        <dl class="ficha">
+          <dt>Nombre científico</dt>
+          <dd class="cientifico">{cientifico}</dd>
+          <dt>Grupo</dt>
+          <dd>{grupo}</dd>
+        </dl>
+        {
+          profundidad && (
+            <div>
+              <p class="dato rotulo">Dónde la encuentro</p>
+              <FranjaProfundidad {...profundidad} />
+            </div>
+          )
+        }
+      </aside>
+    </div>
+
+    {
+      inmersiones.length > 0 && (
+        <section class="bloque">
+          <h2>Inmersiones donde aparece</h2>
+          <ul class="rejilla ancha">
+            {inmersiones.map((inmersion) => (
+              <li>
+                <TarjetaInmersion inmersion={inmersion} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .binomio {
+    margin-top: 0.75rem;
+    font: italic 400 clamp(1.4rem, 3vw, 2rem) var(--f-titulo);
+    color: var(--mar-2);
+  }
+
+  aside {
+    display: grid;
+    gap: 1.75rem;
+  }
+
+  .rotulo {
+    color: var(--tinta-suave);
+  }
+</style>

@@ -1,0 +1,25 @@
+---
+import Base from '../../layouts/Base.astro';
+import Encabezado from '../../components/Encabezado.astro';
+import FilaTema from '../../components/FilaTema.astro';
+import { temasRecientes } from '../../lib/contenido';
+
+const temas = await temasRecientes();
+---
+
+<Base titulo="Temas" descripcion="Artículos sobre el mar, el buceo y lo que lo rodea.">
+  <Encabezado
+    sobre="Apuntes sueltos"
+    titulo="Temas"
+    resumen="Todo lo que no es una zona, una especie ni una inmersión concreta."
+  />
+  <div class="contenedor cuerpo">
+    {temas.length > 0 ? temas.map((tema) => <FilaTema tema={tema} />) : <p class="vacio">Todavía no hay temas escritos.</p>}
+  </div>
+</Base>
+
+<style>
+  .cuerpo {
+    padding-block: 1.5rem 5rem;
+  }
+</style>

@@ -1,0 +1,67 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import FranjaProfundidad from './FranjaProfundidad.astro';
+import { ruta } from '../lib/sitio';
+
+interface Props {
+  especie: CollectionEntry<'especies'>;
+}
+
+const { especie } = Astro.props;
+const { nombre, cientifico, tipo, grupo, profundidad, imagen } = especie.data;
+---
+
+<a class="hoja" href={ruta(`/especies/${especie.id}/`)}>
+  <div class:list={['lamina', tipo]}>
+    {
+      imagen ? (
+        <Image src={imagen.src} alt={imagen.alt} width={640} />
+      ) : (
+        <span class="cientifico" aria-hidden="true">
+          {cientifico}
+        </span>
+      )
+    }
+  </div>
+  <div class="cuerpo">
+    <p class="dato">{tipo} · {grupo}</p>
+    <h3>{nombre}</h3>
+    <p class="cientifico">{cientifico}</p>
+    {profundidad && <FranjaProfundidad {...profundidad} />}
+  </div>
+</a>
+
+<style>
+  /* Sin foto, la lámina dibuja curvas de nivel con el nombre científico encima. */
+  .lamina {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 2px 2px 0 0;
+    color: var(--espuma);
+    background:
+      repeating-radial-gradient(circle at 20% 125%, transparent 0 17px, rgb(251 249 242 / 0.1) 17px 18px),
+      linear-gradient(160deg, var(--mar-1), var(--mar-3));
+  }
+
+  .lamina.flora {
+    background:
+      repeating-radial-gradient(circle at 80% 125%, transparent 0 17px, rgb(251 249 242 / 0.1) 17px 18px),
+      linear-gradient(160deg, #8a2c3a, #4a1722);
+  }
+
+  .lamina img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .lamina span {
+    padding: 1rem;
+    font: italic 400 1.7rem/1.05 var(--f-titulo);
+    text-align: center;
+    text-wrap: balance;
+  }
+</style>
